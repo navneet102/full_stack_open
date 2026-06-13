@@ -5,6 +5,9 @@ import commService from './CommService'
 import Filter from './Filter'
 import PersonForm from './PersonForm'
 import Persons from './Persons'
+import Notification from './Notification'
+
+import "./app.css"
 
 const App = () => {
 
@@ -13,6 +16,8 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [searchName, setSearchName] = useState('')
   const [viewAll, setViewAll] = useState(true)
+  const [errMsg, setErrMsg] = useState(null)
+  const [errColor, setErrColor] = useState('green')
 
   useEffect(() => {
     commService.getAll()
@@ -35,6 +40,16 @@ const App = () => {
         const updatedPerson = {...alreadyPresentPerson, number: newNumber}
         setPersons(persons.map((p) => (p.name !== newName ? p : updatedPerson)))
         commService.updatePerson(updatedPerson)
+          .catch(error => {
+            setPersons(persons.filter((person) => person.name !== alreadyPresentPerson.name))
+
+            setErrColor("red")
+            setErrMsg(`Information of ${alreadyPresentPerson.name} has already been removed from server`)
+            setTimeout(() => {
+              setErrMsg(null)
+              setErrColor("green")
+            }, 5000)
+          })
       }
 
       setNewName('')
@@ -51,6 +66,12 @@ const App = () => {
       .then((response)=>{
         // console.log(response.data)
         setPersons(persons.concat(response.data))
+
+        setErrMsg(`Added ${newName}`)
+        setTimeout(() => {
+          setErrMsg(null)
+        }, 5000)
+
         setNewName('')
         setNewNumber('')
       })
@@ -82,6 +103,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={errMsg} color={errColor}/>
       <Filter searchName={searchName} handleSearchNameChange={handleSearchNameChange}/>
       <h3>Add a new</h3>
       <PersonForm newName={newName} newNumber={newNumber} addPerson={addPerson} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange} />
