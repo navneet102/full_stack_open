@@ -1,9 +1,11 @@
 import express from "express"
 import morgan from "morgan"
+import cors from "cors"
 
 const app = express()
 app.use(express.json())
 app.use(morgan('tiny'))
+app.use(cors())
 
 app.get('/api/persons', (request, response) => {
     response.json(data)
@@ -36,7 +38,7 @@ app.delete('/api/persons/:id', (request, response) => {
             error: "ID not found"
         })
     }
-    data = data.filter((person) => {person.id !== id})
+    data = data.filter((person) => (person.id !== id))
     response.send("Deleted")
 })
 
@@ -86,12 +88,13 @@ let data = [
 ]
 
 const getId = () => {
-    const maxId = (data.lenght>0) ? (Math.max(...data.map((person) => (Number(person.id)))))
+    const maxId = (data.length>0) ? (Math.max(...data.map((person) => (Number(person.id)))))
         : 0
 
     return String(maxId+1) 
 }
 
-app.listen(3001, () => {
-    console.log("Server started")
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
 })
